@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <h1 class="text-center my-4">Ordini per il Tavolo #{{ table.table_number }}</h1>
+
+    <ul class="list-group">
+        {% for order in orders %}
+            <li class="list-group-item">
+                <strong>Ordine #{{ order.id }}</strong><br>
+                <small>Creato il: {{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</small><br>
+                <strong>Totale:</strong> €{{ '%.2f' | format(order.total_price) }}<br>
+                <strong>Stato:</strong> {{ order.status }}<br>
+
+                <form method="POST" action="{{ url_for('update_order_status', order_id=order.id, new_status='delivered') }}">
+                    <button type="submit" class="btn btn-success">Consegnato</button>
+                </form>
+                <form method="POST" action="{{ url_for('update_order_status', order_id=order.id, new_status='rejected') }}">
+                    <button type="submit" class="btn btn-danger">Rifiutato</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+
+{% block title %}Le tue Prenotazioni{% endblock %}
+
+{% block content %}
+    <div class="reservations-container">
+        <h1>Le tue Prenotazioni Attive</h1>
+        <p>Visualizza tutte le prenotazioni che hai effettuato.</p>
+
+        {% if reservations %}
+            <table class="reservations-table">
+                <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Orario</th>
+                    <th>Numero di Persone</th>
+                    <th>Tavolo</th>
+                    <th>Note</th>
+                    <th>Azioni</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for reservation in reservations %}
+                    <tr>
+                        <td>{{ reservation.date }}</td>
+                        <td>{{ reservation.time }}</td>
+                        <td>{{ reservation.guests }}</td>
+                        <td>{{ reservation.table_id }}</td>
+                        <td>{{ reservation.note if reservation.note else 'Nessuna' }}</td>
+                        <td>
+                            <form action="{{ url_for('auth.delete_reservation', reservation_id=reservation.id) }}" method="POST">
+                                <button type="submit" class="btn-delete">Elimina</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Non hai ancora effettuato prenotazioni.</p>
+        {% endif %}
+    </div>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        .reservations-container {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 1.5rem;
+            background: #fff8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(216, 127, 10, 0.2);
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            color: #2c3e50;
+        }
+
+        .reservations-container h1 {
+            color: #d87f0a;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .reservations-container p {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .reservations-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            font-weight: 400;
+        }
+
+        .reservations-table th,
+        .reservations-table td {
+            padding: 0.8rem;
+            border: 1px solid #f39c12;
+            text-align: center;
+        }
+
+        .reservations-table th {
+            background-color: #d87f0a;
+            color: white;
+            font-weight: 600;
+        }
+
+        .reservations-table tr:nth-child(even) {
+            background-color: #fff3e0;
+        }
+
+        .reservations-table tr:hover {
+            background-color: #ffe0b2;
+        }
+
+        .reservations-table td {
+            font-size: 1rem;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+
+        @media (max-width: 600px) {
+            .reservations-table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <h1 class="text-center my-4 menu-title">Menù del Ristorante</h1>
+
+    <div class="accordion mx-auto" id="menuAccordion" style="max-width: 800px;">
+        {% for category, items in [('Antipasti', antipasti), ('Primi Piatti', primi), ('Secondi Piatti', secondi), ('Bevande', bevande)] %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ loop.index }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse{{ loop.index }}" aria-expanded="false"
+                            aria-controls="collapse{{ loop.index }}">
+                        {{ category }}
+                    </button>
+                </h2>
+                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse"
+                     aria-labelledby="heading{{ loop.index }}" data-bs-parent="#menuAccordion">
+                    <div class="accordion-body">
+                        {% for item in items %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2 menu-item">
+                                <div>
+                                    <strong>{{ item.name }}</strong><br>
+                                    <small class="text-muted">{{ item.description }}</small>
+                                </div>
+                                <div>
+                                    €{{ '%.2f' | format(item.price) }}
+                                    <button class="btn btn-sm btn-outline-success ms-2 py-0 px-2"
+                                            onclick="addToCart({{ item.id }}, '{{ item.name }}', {{ item.price }})">+
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="order-summary mt-5 mx-auto" style="max-width: 800px;">
+        <h4>Il tuo ordine</h4>
+        <ul id="cart-list" class="list-group mb-3"></ul>
+        <p><strong>Totale:</strong> €<span id="total">0.00</span></p>
+        <form method="POST" action="{{ url_for('auth.submit', reservation_id=reservation_id) }}">
+            <input type="hidden" name="order_data" id="order-data">
+            <input type="hidden" name="table_id" value="{{ selected_table_id }}">
+            <button type="submit" class="btn btn-primary" onclick="submitOrder()">Conferma Ordine</button>
+            <a href="{{ url_for('auth.order_history', reservation_id=reservation_id) }}"
+               class="btn btn-secondary mt-4">Storico Ordini</a>
+        </form>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function addToCart(id, name, price) {
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({id, name, price, quantity: 1});
+            }
+            updateCart();
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCart();
+        }
+
+        function changeQuantity(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartList = document.getElementById('cart-list');
+            const totalSpan = document.getElementById('total');
+            cartList.innerHTML = '';
+            let total = 0;
+
+            cart.forEach(item => {
+                const li = document.createElement('li');
+                li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+                const name = document.createElement('span');
+                name.textContent = `${item.name} (x${item.quantity})`;
+
+                const controls = document.createElement('div');
+                controls.innerHTML = `
+                €${(item.price * item.quantity).toFixed(2)}
+                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="changeQuantity(${item.id}, -1)">-</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="changeQuantity(${item.id}, 1)">+</button>
+                <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeFromCart(${item.id})">✕</button>
+            `;
+
+                li.appendChild(name);
+                li.appendChild(controls);
+                cartList.appendChild(li);
+                total += item.price * item.quantity;
+            });
+
+            totalSpan.textContent = total.toFixed(2);
+            document.getElementById('order-data').value = JSON.stringify(cart);
+        }
+
+        function submitOrder() {
+            document.getElementById('order-data').value = JSON.stringify(cart);
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .menu-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .accordion-button {
+            background-color: #fff8f0;
+            color: #d87f0a;
+            font-weight: 600;
+            border: 1px solid #f39c12;
+            transition: background-color 0.3s ease;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .menu-item {
+            color: #2c3e50;
+        }
+
+        .menu-item strong {
+            color: #d87f0a;
+        }
+
+        .menu-item small {
+            color: #7f8c8d;
+        }
+
+        .btn-outline-success {
+            border-color: #d87f0a;
+            color: #d87f0a;
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-outline-success:hover {
+            background-color: #d87f0a;
+            color: white;
+        }
+
+        .order-summary h4 {
+            color: #d87f0a;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background-color: #d87f0a;
+            border-color: #d87f0a;
+            font-weight: 600;
+            border-radius: 12px;
+            padding: 0.7rem 2rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #f39c12;
+            border-color: #f39c12;
+        }
+
+        .btn-secondary {
+            background-color: #f0e6d2;
+            color: #d87f0a;
+            font-weight: 600;
+            border-radius: 12px;
+            padding: 0.6rem 1.8rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1b97e;
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border-color: #d87f0a;
+            color: #d87f0a;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #d87f0a;
+            color: white;
+        }
+
+        .btn-outline-danger {
+            border-color: #c0392b;
+            color: #c0392b;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+    </style>
+
+{% endblock %}
+
+

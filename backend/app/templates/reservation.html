@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block title %}Effettua una Prenotazione{% endblock %}
+
+{% block content %}
+    <div class="reservation-container">
+        <h1>Prenota il tuo tavolo</h1>
+        <p>Compila il modulo qui sotto per effettuare una prenotazione.</p>
+
+        <form action="{{ url_for('auth.reservation') }}" method="POST" class="reservation-form">
+            <label for="data">Data:</label>
+            <input type="date" id="data" name="data" required>
+
+            <label for="ora">Orario:</label>
+            <input type="time" id="ora" name="ora" required>
+
+            <label for="persone">Numero di persone:</label>
+            <input type="number" id="persone" name="persone" min="1" max="20" required>
+
+            <label for="table_id">Seleziona tavolo:</label>
+            <select id="table_id" name="table_id" required>
+                {% for table in tables %}
+                    <option value="{{ table.id }}">Tavolo {{ table.name }} (posti: {{ table.seats }})</option>
+                {% endfor %}
+            </select>
+
+            <label for="note">Note (facoltative):</label>
+            <textarea id="note" name="note" rows="3" placeholder="Es. richieste particolari, allergie..."></textarea>
+
+            <button type="submit" class="btn">Invia Prenotazione</button>
+        </form>
+    </div>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .reservation-container {
+            max-width: 600px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #fff8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(211, 144, 0, 0.3);
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .reservation-container {
+            color: #d87f0a;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .reservation-container p {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .reservation-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .reservation-form label {
+            font-weight: 600;
+            color: #d87f0a;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        .reservation-form input,
+        .reservation-form select,
+        .reservation-form textarea {
+            padding: 0.8rem;
+            border: 1.5px solid #f39c12;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+
+        .reservation-form input:focus,
+        .reservation-form select:focus,
+        .reservation-form textarea:focus {
+            outline: none;
+            border-color: #d87f0a;
+            box-shadow: 0 0 8px rgba(216, 127, 10, 0.5);
+        }
+
+        .reservation-form button.btn {
+            background-color: #d87f0a;
+            color: white;
+            border: none;
+            padding: 0.9rem;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .reservation-form button.btn:hover {
+            background-color: #f39c12;
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+    </style>
+{% endblock %}

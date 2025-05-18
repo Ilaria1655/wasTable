@@ -1,0 +1,230 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="page-header">Dettaglio Prenotazione #{{ reservation.id }}</h2>
+
+        <div class="card reservation-card">
+            <div class="card-body">
+                <h5 class="card-title">👤 Cliente: {{ reservation.user.username if reservation.user else 'N/A' }}</h5>
+                <p><strong>📅 Data:</strong> {{ reservation.date }}</p>
+                <p><strong>🕒 Orario:</strong> {{ reservation.time }}</p>
+                <p><strong>🍽️
+                    Tavolo:</strong> {{ reservation.table.name if reservation.table else reservation.table_id }}</p>
+                <p><strong>👥 Persone:</strong> {{ reservation.guests }}</p>
+                <p><strong>📝 Note:</strong> {{ reservation.note or 'Nessuna nota' }}</p>
+            </div>
+        </div>
+
+        <h3 class="orders-header">📦 Ordini Associati</h3>
+
+        {% if orders %}
+            <ul class="list-group">
+                {% for order in orders %}
+                    <li class="list-group-item order-item">
+                        <div class="order-header">
+                            <strong>Ordine #{{ order.id }}</strong>
+                            - {{ order.created_at.strftime('%d/%m/%Y %H:%M') }}<br>
+                            <strong>Totale:</strong> €{{ '%.2f' | format(order.total_price) }}
+                        </div>
+
+                        <form method="POST" action="{{ url_for('auth.update_order_status', order_id=order.id) }}">
+                            <div class="status-select-wrapper">
+                                <strong>Stato:</strong>
+                                <select name="status" class="status-select" onchange="this.form.submit()">
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>In
+                                        attesa
+                                    </option>
+                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>
+                                        Consegnato
+                                    </option>
+                                    <option value="rejected" {% if order.status == 'rejected' %}selected{% endif %}>
+                                        Rifiutato
+                                    </option>
+                                </select>
+                            </div>
+                        </form>
+
+                        <ul class="order-items-list">
+                            {% for item in order.items %}
+                                <li>
+                                    {{ item['name'] }} x{{ item['quantity'] }} -
+                                    €{{ '%.2f' | format(item['price'] * item['quantity']) }}
+                                    {% if item['note'] %}
+                                        <br><em>📝 Note: {{ item['note'] }}</em>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-orders-msg">Nessun ordine per questa prenotazione.</p>
+        {% endif %}
+
+        <div class="back-btn-wrapper">
+            <a href="{{ url_for('auth.view_tables') }}" class="btn btn-secondary">← Torna alla Planimetria</a>
+        </div>
+    </div>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fff8f0;
+            color: #2c3e50;
+        }
+
+        .page-header {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .container {
+            margin-top: 16rem;
+            max-width: 720px;
+            padding: 0 1rem;
+        }
+
+        .reservation-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(243, 156, 18, 0.15);
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            text-align: left;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            color: #d87f0a;
+        }
+
+        h3.orders-header {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #f39c12;
+            text-align: left;
+        }
+
+        .list-group {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list-group-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.1);
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-header {
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .status-select-wrapper {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .status-select {
+            padding: 0.35rem 0.6rem;
+            border-radius: 8px;
+            border: 1.5px solid #f39c12;
+            background-color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .status-select:hover,
+        .status-select:focus {
+            border-color: #d87f0a;
+            outline: none;
+            box-shadow: 0 0 8px rgba(216, 127, 10, 0.3);
+        }
+
+        .order-items-list {
+            list-style-type: disc;
+            margin-left: 1.2rem;
+            font-size: 0.95rem;
+            color: #34495e;
+        }
+
+        .order-items-list li {
+            margin-bottom: 0.4rem;
+        }
+
+        .order-items-list em {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .no-orders-msg {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-top: 1.5rem;
+        }
+
+        .back-btn-wrapper {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .btn-secondary {
+            background-color: #636e72;
+            color: white;
+            padding: 0.85rem 1.6rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background-color: #828d93;
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                margin: 120px 1rem 2rem;
+                padding: 0 0.5rem;
+            }
+
+            .page-header {
+                font-size: 1.5rem;
+                padding: 10px 0;
+            }
+
+            .reservation-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+

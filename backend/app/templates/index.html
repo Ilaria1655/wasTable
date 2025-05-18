@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+{% block title %}Home - wasTable{% endblock %}
+{% block content %}
+<div class="home-wrapper">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo wasTable" class="home-logo">
+
+    <h1>Benvenuto su <span class="highlight">wasTable</span> 🍽️</h1>
+
+    <p class="lead-text">
+        Il ristorante con un solo tavolo speciale. Prenota il tavolo <strong>wasTable</strong> e vivi un'esperienza unica:
+        paghi una tariffa fissa a persona e ricevi una bibita e una portata garantita.<br>
+        Ma non è tutto! Arriveranno anche tutte le portate rifiutate o restituite dagli altri tavoli.
+        Un viaggio nel gusto e nella sorpresa che solo <em>wasTable</em> ti può offrire.
+    </p>
+
+    <div class="btn-group">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Accedi come Cliente</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Accedi come Amministratore</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Registrati</a>
+    </div>
+</div>
+
+<style>
+.home-wrapper {
+    max-width: 700px;
+    margin: 5rem auto 3rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+.home-logo {
+    width: 150px;
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+    animation: fadeIn 1.5s ease forwards;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.highlight {
+    color: #f39c12;
+}
+
+.lead-text {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 2.5rem;
+}
+
+.btn-group .btn {
+    margin: 0 0.7rem;
+    min-width: 170px;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 10px rgba(243, 156, 18, 0.25);
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #f39c12;
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #d87f0a;
+    box-shadow: 0 8px 15px rgba(216, 127, 10, 0.4);
+    transform: translateY(-3px);
+}
+
+.btn-secondary {
+    background-color: #34495e;
+    border: none;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #2c3e50;
+    box-shadow: 0 8px 15px rgba(44, 62, 80, 0.4);
+    transform: translateY(-3px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .home-wrapper {
+        margin: 3rem 1rem 2rem 1rem;
+        padding: 1.5rem;
+    }
+    .btn-group .btn {
+        margin: 0.5rem 0;
+        width: 100%;
+        min-width: unset;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block title %}Prenotazioni Tavolo{% endblock %}
+{% block content %}
+<h2>Prenotazioni di oggi – Tavolo {{ table.name }}</h2>
+{% if reservations %}
+<table class="reservations-table">
+    <thead>
+        <tr>
+            <th>Ora</th>
+            <th>Cliente</th>
+            <th>Persone</th>
+            <th>Note</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for res in reservations %}
+        <tr>
+            <td>{{ res.time.strftime('%H:%M') }}</td>
+            <td>{{ res.user.username }}</td>
+            <td>{{ res.guests }}</td>
+            <td>{{ res.note or '—' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nessuna prenotazione oggi per questo tavolo.</p>
+{% endif %}
+{% endblock %}

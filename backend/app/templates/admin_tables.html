@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <h1 class="text-center my-4">Tavoli Occupati</h1>
+    <div class="list-group">
+        {% for table in tables %}
+            <a href="{{ url_for('admin_orders', table_id=table.id) }}" class="list-group-item list-group-item-action">
+                Tavolo #{{ table.table_number }}
+            </a>
+        {% endfor %}
+    </div>
+{% endblock %}

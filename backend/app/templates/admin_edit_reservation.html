@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+
+{% block title %}Modifica Prenotazione{% endblock %}
+
+{% block content %}
+<div class="reservation-container">
+    <h1>Modifica Prenotazione</h1>
+
+    <form action="{{ url_for('auth.edit_reservation', reservation_id=reservation.id) }}" method="POST" class="reservation-form">
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data" value="{{ reservation.date }}" required>
+
+        <label for="ora">Orario:</label>
+        <input type="time" id="ora" name="ora" value="{{ reservation.time }}" required>
+
+        <label for="persone">Numero di persone:</label>
+        <input type="number" id="persone" name="persone" value="{{ reservation.guests }}" min="1" max="20" required>
+
+        <label for="table_id">Seleziona tavolo:</label>
+        <select name="table_id" id="table_id" required>
+            {% for table in tables %}
+                <option value="{{ table.id }}" {% if reservation.table_id == table.id %}selected{% endif %}>
+                    Tavolo {{ table.id }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="note">Note (facoltative):</label>
+        <textarea id="note" name="note" rows="3">{{ reservation.note or '' }}</textarea>
+
+        <button type="submit" class="btn btn-primary">Salva Modifiche</button>
+    </form>
+</div>
+
+<style>
+.reservation-container {
+    margin-top: 20rem;
+    max-width: 600px;
+    background-color: #fff;
+    padding: 2.5rem 2.5rem 3rem 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(243, 156, 18, 0.15);
+    font-family: 'Poppins', sans-serif;
+    color: #2c3e50;
+}
+
+.reservation-container h1 {
+    font-weight: 700;
+    font-size: 2.4rem;
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.reservation-form label {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 1.2rem;
+    color: #34495e;
+}
+
+.reservation-form input,
+.reservation-form select,
+.reservation-form textarea {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    margin-top: 0.4rem;
+    border: 1.8px solid #f39c12;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    color: #34495e;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.reservation-form input:focus,
+.reservation-form select:focus,
+.reservation-form textarea:focus {
+    border-color: #d87f0a;
+    outline: none;
+    box-shadow: 0 0 8px rgba(216, 127, 10, 0.4);
+}
+
+.reservation-form textarea {
+    resize: vertical;
+}
+
+.reservation-form button.btn-primary {
+    margin-top: 2.8rem;
+    width: 100%;
+    padding: 1.2rem;
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(243, 156, 18, 0.3);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.reservation-form button.btn-primary:hover {
+    background-color: #d87f0a;
+    box-shadow: 0 12px 30px rgba(216, 127, 10, 0.5);
+    transform: translateY(-3px);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .reservation-container {
+        margin: 100px 1rem 3rem 1rem;
+        padding: 2rem 1.5rem 2.5rem 1.5rem;
+    }
+
+    .reservation-form button.btn-primary {
+        font-size: 1.1rem;
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}

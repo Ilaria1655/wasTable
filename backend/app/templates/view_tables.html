@@ -1,0 +1,275 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1 class="text-center mt-4" style="font-family: 'Poppins', sans-serif;">Planimetria Tavoli
+        Ristorante</h1>
+
+    <div id="restaurant-layout" class="restaurant-layout"></div>
+
+    <div class="panel" id="panel">
+        <button class="close-btn" onclick="closePanel()">Chiudi</button>
+        <h2 id="panel-title" style="font-family: 'Poppins', sans-serif;">Tavolo</h2>
+        <div id="reservation-list"></div>
+        <div id="order-actions" style="margin-top: 20px;"></div>
+    </div>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        body,html{
+            background-color: transparent !important;
+        }
+        .text-center {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: #2c3e50; !important;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .restaurant-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1000px;
+            margin: auto;
+            background-color: transparent; !important;
+        }
+
+        .table {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 6px rgba(216, 127, 10, 0.4);
+            user-select: none;
+        }
+
+        .table:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(216, 127, 10, 0.7);
+        }
+
+        .free {
+            background-color: #fdc405;
+            box-shadow: 0 2px 8px rgb(217, 82, 82);
+        }
+
+        .occupied {
+            background-color: #7a380a;
+            box-shadow: 0 2px 8px rgba(139, 69, 19, 0.6);
+        }
+
+        .wasTable {
+            background-color: #d87f0a !important;
+            box-shadow: 0 2px 10px rgba(216, 127, 10, 0.8);
+        }
+
+        .has-reservation {
+            background-color: #ff6f4a;
+            filter: brightness(0.85);
+            box-shadow: 0 2px 10px rgba(255, 111, 74, 0.7);
+        }
+
+        .panel {
+            margin-top: 60px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 320px;
+            height: 100%;
+            background: #fff8f0;
+            box-shadow: -2px 0 8px rgba(216, 127, 10, 0.25);
+            padding: 20px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            z-index: 100;
+            font-family: 'Poppins', sans-serif;
+            color: #2c3e50;
+            border-left: 4px solid #d87f0a;
+        }
+
+        .panel.open {
+            transform: translateX(0);
+        }
+
+        .close-btn {
+            background: #d87f0a;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            float: right;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #b26807;
+        }
+
+        .reservation-card {
+            background: white;
+            border: 1px solid #f5a623;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin: 10px 0;
+            box-shadow: 0 3px 10px rgba(216, 127, 10, 0.1);
+            cursor: pointer;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+            font-weight: 600;
+            color: #d87f0a;
+        }
+
+        .reservation-card:hover {
+            box-shadow: 0 5px 14px rgba(216, 127, 10, 0.25);
+            border-color: #b26807;
+        }
+
+        .reservation-card.active {
+            border-color: #4caf50;
+            background-color: #e8f5e9;
+            box-shadow: 0 0 10px #4caf50;
+            color: #2e7d32;
+        }
+
+        .order-btn {
+            display: inline-block;
+            margin: 6px 6px 6px 0;
+            padding: 6px 14px;
+            background-color: #d87f0a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .order-btn:hover:not(:disabled) {
+            background-color: #b26807;
+        }
+
+        .order-btn:disabled {
+            background-color: #ccc;
+            cursor: default;
+            color: #666;
+        }
+
+        .order-item {
+            border-left: 4px solid transparent;
+            padding-left: 8px;
+            margin-bottom: 12px;
+        }
+    </style>
+
+    <script>
+        const layout = document.getElementById('restaurant-layout');
+        const panel = document.getElementById('panel');
+        const panelTitle = document.getElementById('panel-title');
+        const reservationList = document.getElementById('reservation-list');
+        const orderActions = document.getElementById('order-actions');
+
+        async function fetchAndRenderLayout(selectedTableId = null, selectedTableName = '') {
+            const [tables, reservations] = await Promise.all([
+                fetch('/api/tables/status').then(res => res.json()),
+                fetch('/api/reservations/today').then(res => res.json())
+            ]);
+
+            const tablesWithReservations = new Set(reservations.map(r => r.table_id));
+            layout.innerHTML = '';
+
+            tables.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'table';
+                div.classList.add(t.occupied ? 'occupied' : 'free');
+                if (tablesWithReservations.has(t.id)) div.classList.add('has-reservation');
+                if (t.name === 'wasTable') div.classList.add('wasTable');
+                div.textContent = t.seats;
+                div.onclick = () => openPanel(t.id, t.name || t.id);
+                layout.appendChild(div);
+            });
+
+            if (selectedTableId !== null) {
+                panelTitle.textContent = `Prenotazioni Tavolo ${selectedTableName}`;
+                const selectedReservations = reservations
+                    .filter(r => r.table_id === selectedTableId)
+                    .sort((a, b) => a.time.localeCompare(b.time));
+
+                reservationList.innerHTML = selectedReservations.length
+                    ? selectedReservations.map(r => `
+                        <div class="reservation-card" onclick="window.location.href='/current_reservation/${r.id}'">
+                             <strong>${r.customer_name}</strong><br>
+                             <small>Alle ${r.time}</small>
+                         </div>
+                    `).join('')
+                    : '<p>Nessuna prenotazione per oggi.</p>';
+
+                panel.classList.add('open');
+                orderActions.innerHTML = '';
+            } else {
+                panel.classList.remove('open');
+                reservationList.innerHTML = '';
+                panelTitle.textContent = 'Tavolo';
+                orderActions.innerHTML = '';
+            }
+        }
+
+        function openPanel(tableId, tableName) {
+            fetchAndRenderLayout(tableId, tableName);
+        }
+
+        function closePanel() {
+            panel.classList.remove('open');
+        }
+
+        async function showReservationOrders(reservationId, customerName, time) {
+            document.querySelectorAll('.reservation-card').forEach(card => card.classList.remove('active'));
+            const selectedCard = [...document.querySelectorAll('.reservation-card')].find(card =>
+                card.textContent.includes(customerName) && card.textContent.includes(time)
+            );
+            if (selectedCard) selectedCard.classList.add('active');
+
+            const orders = await fetch(`/current_reservation/${reservationId}`).then(res => res.json());
+
+            if (!orders.length) {
+                orderActions.innerHTML = `<p>Nessun ordine per ${customerName} alle ${time}.</p>`;
+                return;
+            }
+
+            orderActions.innerHTML = `
+            <h3>Ordini per ${customerName} alle ${time}</h3>
+            ${orders.map(order => `
+                <div class="order-item" id="order-${order.id}">
+                    <p>${order.item_name}</p>
+                    <button onclick="updateOrderStatus(${order.id}, 'delivered', this)" class="order-btn">✅ Consegnato</button>
+                    <button onclick="updateOrderStatus(${order.id}, 'rejected', this)" class="order-btn">❌ Mandato indietro</button>
+                </div>
+            `).join('')}
+        `;
+        }
+
+        async function updateOrderStatus(orderId, status, button) {
+            await fetch(`/api/order/${orderId}/status/${status}`, {method: 'POST'});
+            const container = document.getElementById(`order-${orderId}`);
+            container.style.opacity = '0.5';
+            container.style.borderLeft = status === 'delivered' ? '4px solid green' : '4px solid red';
+            const buttons = container.querySelectorAll('button.order-btn');
+            buttons.forEach(btn => btn.disabled = true);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchAndRenderLayout();
+        });
+    </script>
+{% endblock %}

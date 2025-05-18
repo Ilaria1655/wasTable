@@ -1,0 +1,132 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h2 class="text-center">Storico Ordini</h2>
+
+        {% if orders %}
+            <ul class="list-group w-100">
+                {% for order in orders %}
+                    <li class="list-group-item shadow-sm mb-3 rounded">
+                        <strong>Ordine #{{ order.id }}</strong> - {{ order.created_at.strftime('%d/%m/%Y %H:%M') }} <br>
+                        <p><strong>Stato:</strong>
+                            {% if order.status == 'delivered' %}
+                                <span class="badge bg-success">Consegnato</span>
+                            {% elif order.status == 'rejected' %}
+                                <span class="badge bg-danger">Rifiutato</span>
+                            {% else %}
+                                <span class="badge bg-secondary">In attesa</span>
+                            {% endif %}
+                        </p>
+
+                        <strong>Totale:</strong> €{{ '%.2f' | format(order.total_price) }} <br>
+                        <ul class="mt-2">
+                            {% for item in order.items %}
+                                <li>{{ item.name }} x{{ item.quantity }} -
+                                    €{{ '%.2f' | format(item.price * item.quantity) }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">Nessun ordine effettuato.</p>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('auth.menu', reservation_id=reservation_id) if reservation_id else url_for('auth.menu') }}"
+               class="btn btn-secondary">Torna al Menu</a>
+        </div>
+    </div>
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        h2.text-center {
+            margin-top: 5rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin-top: 30px; /* spazio per navbar + h2 */
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            color: #2c3e50;
+        }
+
+        .list-group-item {
+            background-color: #fff8f0;
+            border: 1px solid #f1c40f;
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.15);
+        }
+
+        .list-group-item strong {
+            color: #d87f0a;
+        }
+
+        .badge.bg-success {
+            background-color: #27ae60 !important;
+            font-weight: 600;
+        }
+
+        .badge.bg-danger {
+            background-color: #c0392b !important;
+            font-weight: 600;
+        }
+
+        .badge.bg-secondary {
+            background-color: #bdc3c7 !important;
+            font-weight: 600;
+        }
+
+        .btn-secondary {
+            background-color: #f0e6d2;
+            color: #d87f0a;
+            font-weight: 600;
+            border-radius: 12px;
+            padding: 0.7rem 2rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1b97e;
+            color: white;
+        }
+
+        .text-muted {
+            color: #7f8c8d !important;
+            font-style: italic;
+        }
+    </style>
+{% endblock %}
+
+
