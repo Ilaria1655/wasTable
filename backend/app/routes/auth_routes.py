@@ -331,7 +331,7 @@ def all_reservations_today():
             "id": r.id,
             "table_id": r.table_id,
             "customer_name": r.user.username if r.user else "Utente sconosciuto",
-            "time": r.time
+            "time": r.time.strftime('%H:%M')
         } for r in reservations
     ])
 
@@ -343,6 +343,8 @@ def menu(reservation_id):
     current_time = datetime.now().time()
     if isinstance(reservation.time, str):
         reservation_time = datetime.strptime(reservation.time, "%H:%M").time()
+    elif isinstance(reservation.time, time):
+        reservation_time = reservation.time
     if current_time < reservation_time:
         return "Non puoi ancora ordinare. Torna più tardi.", 403
 

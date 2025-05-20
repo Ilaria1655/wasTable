@@ -1,13 +1,14 @@
 from .. import db
 from  backend.app.models.user import User
 from flask_login import UserMixin
+from sqlalchemy import Date
 
 class Reservation(db.Model):
     __tablename__ = 'reservation'
 
     # Colonne della tabella
     id = db.Column(db.Integer, primary_key=True)  # Colonna primaria
-    date = db.Column(db.String(50), nullable=False)  # Data della prenotazione
+    date = db.Column(Date, nullable=False)  # Data della prenotazione
     time = db.Column(db.String(20), nullable=False)  # Orario della prenotazione
     guests = db.Column(db.Integer, nullable=False)  # Numero di ospiti
     note = db.Column(db.String(255))  # Note opzionali

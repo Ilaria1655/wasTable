@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 from flask_login import LoginManager
 from apscheduler.schedulers.background import BackgroundScheduler
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Inizializzazione estensioni globali
 db = SQLAlchemy()
@@ -26,7 +29,7 @@ def create_app():
 
     # Configurazioni generali
     app.config['SECRET_KEY'] = 'supersegretokey'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3?timeout=30'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SESSION_TYPE'] = 'filesystem'
 
