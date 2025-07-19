@@ -309,7 +309,7 @@ def table_status():
         is_occupied = False
         for r in table.reservations:
             if r.date == today:
-                res_time = datetime.combine(r.date, r.time)
+                res_time = datetime.combine(r.date, datetime.strptime(r.time, "%H:%M").time())
                 if abs((now - res_time).total_seconds()) <= 90 * 60:
                     is_occupied = True
                     break
@@ -331,7 +331,7 @@ def all_reservations_today():
             "id": r.id,
             "table_id": r.table_id,
             "customer_name": r.user.username if r.user else "Utente sconosciuto",
-            "time": r.time.strftime('%H:%M')
+            "time": datetime.strptime(r.time, "%H:%M").strftime('%H:%M')
         } for r in reservations
     ])
 
