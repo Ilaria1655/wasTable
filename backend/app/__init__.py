@@ -29,7 +29,7 @@ def create_app():
 
     # Configurazioni generali
     app.config['SECRET_KEY'] = 'supersegretokey'
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SESSION_TYPE'] = 'filesystem'
 
